@@ -5,7 +5,7 @@ The 32001505x is a family transceivers operating in the 868 MHz SRD Band (EU Ver
 
 The 32001505B/C/D are based on LoRa® RF Technology, providing ultra-long range spread spectrum communication and high interference immunity. 
 
-The 32001505A is based on the new wM-BUS OMS 4 protocol stack. The module supports various operating modes (S, T, R, C) to meet the requirements of one-way and two-way data communication, in stationary and mobile systems.
+The 32001505A is based on the new wM-BUS OMS 2 protocol stack. The module supports various operating modes (S, T, R, C) to meet the requirements of one-way and two-way data communication, in stationary and mobile systems.
 
 # Compatibility
 
