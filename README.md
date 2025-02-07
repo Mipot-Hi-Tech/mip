@@ -29,7 +29,9 @@ The 32001505A is based on the new wM-BUS OMS 2 protocol stack. The module suppor
 
 # Modes of Operation
 
-Customize the portable.c and portable.h files, based on your hardware.
+Modify the portable.c and portable.h files, based on your hardware.
+
+Customize your application in the app folder.
 
 
 # License

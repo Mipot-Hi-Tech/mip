@@ -406,7 +406,7 @@ enum mip_error_t mipd_tx_msg_cmd(const uint8_t *msg, uint8_t msg_len, struct mip
 		return retval;
 	}
 	/* TX_MSG_IND IS COMING FROM THE MODULE */
-	retval = dev->receive_fn(mipd_rx_buff, &rx_msg_len, dev->module_param.DATA_INDICATE_TIMEOUT + 12000);
+	retval = dev->receive_fn(mipd_rx_buff, &rx_msg_len, dev->module_param.DATA_INDICATE_TIMEOUT + 2000);
 	if(retval == no_error)
 	{
 		retval = mip_validate_response(mipd_rx_buff, rx_msg_len);

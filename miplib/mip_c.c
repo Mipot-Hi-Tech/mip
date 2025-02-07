@@ -718,7 +718,6 @@ enum mip_error_t mipc_delete_en_device(uint8_t idx, struct mip_c *const dev)
 {
 	enum mip_error_t retval;
 	uint16_t rx_msg_len;
-	uint8_t i;
 	if (dev->stack_param.device_type != master)
 		return operation_not_supported;
 	mipc_tx_buff[0] = MIP_HEADER;
@@ -738,7 +737,6 @@ enum mip_error_t mipc_delete_en_device(uint8_t idx, struct mip_c *const dev)
 	dev->delay_ms_fn(MIPC_DELAY_MSG);
 	return retval;
 }
-
 
 /*!
  * @brief Deletes whole Network Table.

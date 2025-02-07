@@ -547,6 +547,7 @@ enum mip_error_t mipa_eeprom_read_wmbus_medium_access_parameters(const struct mi
 			}
 		}
 	}
+	dev->delay_ms_fn(MIPA_DELAY_MSG);
 	return retval;
 }
 
@@ -586,6 +587,7 @@ enum mip_error_t mipa_tx_msg_cmd(const uint8_t *msg, uint8_t msg_len, struct mip
 			}
 		}
 	}
+	dev->delay_ms_fn(MIPA_DELAY_MSG);
 	return retval;
 }
 
