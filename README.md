@@ -34,12 +34,15 @@ The A Serie is based on the new wM-BUS OMS 2 protocol stack. The module supports
 ![img1](https://github.com/Mipot-Hi-Tech/mip/blob/master/img/img005.png)
 
 
-# Modes of Operation
+# Modes of Operation for Single Core
 
 Modify the portable.c and portable.h files, based on your hardware.
-
 Customize your application in the app folder.
 
+# Modes of Operation for Dual Core
+
+ipcc handler is already implemented in the *dual_core* folder.
+Customize your application in the app folder.
 
 # License
  
