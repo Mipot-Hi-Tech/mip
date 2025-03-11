@@ -219,9 +219,6 @@ enum mip_error_t MipTransmitAndReceiveData(uint8_t *tx_buff, uint16_t tx_dim, ui
 			}
 
 			case TXRX_HANDLER_COMPLETED:
-			{
-				break;
-			}
 			case TXRX_HANDLER_ERROR:
 			{
 				break;
@@ -229,6 +226,7 @@ enum mip_error_t MipTransmitAndReceiveData(uint8_t *tx_buff, uint16_t tx_dim, ui
 			default:
 			{
 				mip_txrx_handler = TXRX_HANDLER_IDLE;
+				break;
 			}
 		}
 	}
@@ -293,9 +291,6 @@ enum mip_error_t MipReceiveData(uint8_t *rx_buff, uint16_t *rx_dim, uint32_t tim
 			}
 
 			case RX_HANDLER_COMPLETED:
-			{
-				break;
-			}
 			case RX_HANDLER_ERROR:
 			{
 				break;
@@ -303,6 +298,7 @@ enum mip_error_t MipReceiveData(uint8_t *rx_buff, uint16_t *rx_dim, uint32_t tim
 			default:
 			{
 				mip_txrx_handler = RX_HANDLER_IDLE;
+				break;
 			}
 		}
 	}
