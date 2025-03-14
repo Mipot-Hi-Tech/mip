@@ -44,6 +44,9 @@ Customize your application in the app folder.
 ipcc handler is already implemented in the *dual_core* folder.
 Customize your application in the app folder.
 
+> [!TIP]
+> Take a quick look at our [Open Source Project](https://github.com/Mipot-Hi-Tech/mip_servo_controller) with dual core MIP series.
+
 # License
  
 BSD-3-Clause
