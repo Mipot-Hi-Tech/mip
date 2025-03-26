@@ -85,20 +85,44 @@ static void MIP_GPIO_Init(void)
 	GPIO_InitTypeDef GPIO_InitStruct = {0};
 	__HAL_RCC_GPIOA_CLK_ENABLE();
 	__HAL_RCC_GPIOB_CLK_ENABLE();
-	HAL_GPIO_WritePin(DEV_KIT_RESET_GPIO_Port, DEV_KIT_RESET_Pin, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(RESET_GPIO_Port, RESET_Pin, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(NWAKE_GPIO_Port, NWAKE_Pin, GPIO_PIN_RESET);
 
-    /*Configure GPIO pin : DEV_KIT_NDATA_INDICATE_Pin */
-    GPIO_InitStruct.Pin  = DEV_KIT_NDATA_INDICATE_Pin;
+    /*Configure GPIO pin : NDATA_INDICATE_Pin */
+    GPIO_InitStruct.Pin  = NDATA_INDICATE_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
     GPIO_InitStruct.Pull = GPIO_PULLUP;
-    HAL_GPIO_Init(DEV_KIT_NDATA_INDICATE_GPIO_Port, &GPIO_InitStruct);
+    HAL_GPIO_Init(NDATA_INDICATE_GPIO_Port, &GPIO_InitStruct);
 
-	/*Configure GPIO pins : DEV_KIT_RESET_Pin */
-	GPIO_InitStruct.Pin   = DEV_KIT_RESET_Pin;
+	/*Configure GPIO pins : RESET_Pin */
+	GPIO_InitStruct.Pin   = RESET_Pin;
 	GPIO_InitStruct.Mode  = GPIO_MODE_OUTPUT_PP;
 	GPIO_InitStruct.Pull  = GPIO_NOPULL;
 	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-	HAL_GPIO_Init(DEV_KIT_RESET_GPIO_Port, &GPIO_InitStruct);
+	HAL_GPIO_Init(RESET_GPIO_Port, &GPIO_InitStruct);
+
+	/*Configure GPIO pins : NWAKE_Pin */
+	GPIO_InitStruct.Pin   = NWAKE_Pin;
+	GPIO_InitStruct.Mode  = GPIO_MODE_OUTPUT_PP;
+	GPIO_InitStruct.Pull  = GPIO_NOPULL;
+	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+	HAL_GPIO_Init(NWAKE_GPIO_Port, &GPIO_InitStruct);
+
+	/*Configure GPIO pin : UART_TX_MIP_PIN */
+	GPIO_InitStruct.Pin   = UART_TX_MIP_PIN;
+	GPIO_InitStruct.Mode  = GPIO_MODE_AF_PP;
+	GPIO_InitStruct.Pull  = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+    GPIO_InitStruct.Alternate = GPIO_AF1_USART2;
+	HAL_GPIO_Init(UART_TX_MIP_PORT, &GPIO_InitStruct);
+
+	/*Configure GPIO pin : UART_RX_MIP_PIN */
+	GPIO_InitStruct.Pin       = UART_RX_MIP_PIN;
+	GPIO_InitStruct.Mode      = GPIO_MODE_AF_PP;
+	GPIO_InitStruct.Pull      = GPIO_PULLUP;
+    GPIO_InitStruct.Speed     = GPIO_SPEED_FREQ_HIGH;
+    GPIO_InitStruct.Alternate = GPIO_AF1_USART2;
+	HAL_GPIO_Init(UART_RX_MIP_PORT, &GPIO_InitStruct);
 
 	/* EXTI interrupt init*/
 	HAL_NVIC_SetPriority(EXTI4_15_IRQn, 0, 0);
@@ -223,6 +247,7 @@ enum mip_error_t MipTransmitAndReceiveData(uint8_t *tx_buff, uint16_t tx_dim, ui
 			{
 				break;
 			}
+
 			default:
 			{
 				mip_txrx_handler = TXRX_HANDLER_IDLE;
@@ -295,6 +320,7 @@ enum mip_error_t MipReceiveData(uint8_t *rx_buff, uint16_t *rx_dim, uint32_t tim
 			{
 				break;
 			}
+
 			default:
 			{
 				mip_txrx_handler = RX_HANDLER_IDLE;
@@ -308,11 +334,11 @@ enum mip_error_t MipReceiveData(uint8_t *rx_buff, uint16_t *rx_dim, uint32_t tim
 __WEAK void EXTI4_15_IRQHandler(void)
 {
 #ifdef STM32F0
-	if(__HAL_GPIO_EXTI_GET_IT(DEV_KIT_NDATA_INDICATE_Pin) != 0x00u)
+	if(__HAL_GPIO_EXTI_GET_IT(NDATA_INDICATE_Pin) != 0x00u)
 	{
 		ndata_indicate_event++;
 	}
-	__HAL_GPIO_EXTI_CLEAR_IT(DEV_KIT_NDATA_INDICATE_Pin);
+	__HAL_GPIO_EXTI_CLEAR_IT(NDATA_INDICATE_Pin);
 #else
 #error
 #endif
@@ -356,7 +382,7 @@ void USART2_IRQHandler(void)
 #endif
 }
 
- __WEAK  void TIM14_IRQHandler(void)
+__WEAK void TIM14_IRQHandler(void)
 {
 	tick_cnt++;
 #ifdef STM32F0
@@ -368,9 +394,9 @@ void USART2_IRQHandler(void)
 
 void MipHardwareReset(void)
 {
-	HAL_GPIO_WritePin(DEV_KIT_RESET_GPIO_Port, DEV_KIT_RESET_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(RESET_GPIO_Port, RESET_Pin, GPIO_PIN_RESET);
 	Delay_ms(100);
-	HAL_GPIO_WritePin(DEV_KIT_RESET_GPIO_Port, DEV_KIT_RESET_Pin, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(RESET_GPIO_Port, RESET_Pin, GPIO_PIN_SET);
 	Delay_ms(350);
 }
 

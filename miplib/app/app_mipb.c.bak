@@ -180,7 +180,6 @@ static void MipbApp(void *pvParameters)
 			default:
 			{
 				app = mipb_app_check_activation;
-				break;
 			}
 		}
 	}

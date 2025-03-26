@@ -841,6 +841,30 @@ enum mip_error_t mipc_handle_IND_messages(struct mip_c *const dev, uint32_t time
 		{
 			switch(mipc_rx_buff[1])
 			{
+				case MIPC_PAIRING_CONFIRM_IND:
+				{
+					if(mipc_rx_buff[3] == no_error)
+					{
+						dev->end_node_data.is_paired = true;
+						dev->end_node_data.master_serial_number[3] = mipc_rx_buff[4];
+						dev->end_node_data.master_serial_number[2] = mipc_rx_buff[5];
+						dev->end_node_data.master_serial_number[1] = mipc_rx_buff[6];
+						dev->end_node_data.master_serial_number[0] = mipc_rx_buff[7];
+						dev->end_node_data.idx = mipc_rx_buff[8];
+					}
+					else
+					{
+						dev->end_node_data.is_paired = false;
+						dev->end_node_data.master_serial_number[3] = 0;
+						dev->end_node_data.master_serial_number[2] = 0;
+						dev->end_node_data.master_serial_number[1] = 0;
+						dev->end_node_data.master_serial_number[0] = 0;
+						dev->end_node_data.idx = 0;
+						retval = unknown_error;
+					}
+					break;
+				}
+
 				case MIPC_RX_MSG_IND:
 				{
 					dev->rx_data.RssiLSB   = mipc_rx_buff[4];

@@ -11,10 +11,18 @@
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
-#define DEV_KIT_NDATA_INDICATE_Pin       GPIO_PIN_8
-#define DEV_KIT_NDATA_INDICATE_GPIO_Port GPIOA
-#define DEV_KIT_RESET_Pin                GPIO_PIN_6
-#define DEV_KIT_RESET_GPIO_Port          GPIOB
+#define UART_TX_MIP_PIN          GPIO_PIN_2
+#define UART_TX_MIP_PORT         GPIOA
+#define UART_RX_MIP_PIN          GPIO_PIN_3
+#define UART_RX_MIP_PORT         GPIOA
+#define NDATA_INDICATE_Pin       GPIO_PIN_8
+#define NDATA_INDICATE_GPIO_Port GPIOA
+#define RESET_Pin                GPIO_PIN_6
+#define RESET_GPIO_Port          GPIOB
+#define NWAKE_Pin                GPIO_PIN_11
+#define NWAKE_GPIO_Port          GPIOB
+#define NWAKE_HIGH HAL_GPIO_WritePin(NWAKE_GPIO_Port, NWAKE_Pin, GPIO_PIN_SET)
+#define NWAKE_LOW HAL_GPIO_WritePin(NWAKE_GPIO_Port, NWAKE_Pin, GPIO_PIN_RESET)
 
 typedef enum{
        SER_NO_ERROR      = 0x00U,
