@@ -30,7 +30,7 @@
 * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 * POSSIBILITY OF SUCH DAMAGE.
 *
-* @file       mip_b.c
+* @file
 * @date
 * @version
 *
@@ -51,6 +51,15 @@
  * Definitions
  ******************************************************************************/
 #define MIPB_TASK_PRIOTITY 3
+#define MIPB_SINGLE_CORE
+/* With single core Mip Series you need to drive nWAKE pin to put the module into low power consumption */
+#ifdef MIPB_SINGLE_CORE
+#define nWAKE_LOW_MIPB NWAKE_LOW
+#define nWAKE_HIGH_MIPB NWAKE_HIGH
+#else
+#define nWAKE_LOW_MIPB
+#define nWAKE_HIGH_MIPB
+#endif
 
 /*******************************************************************************
  * Prototypes
@@ -69,6 +78,10 @@ const uint8_t JoinEUI_mipb[] = {0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 const uint8_t DevEUI_mipb[]  = {0xDB, 0xAC, 0x06, 0xD0, 0x7E, 0xD5, 0xB3, 0x70};
 const uint8_t AppKey_mipb[]  = {0xE9, 0x12, 0xD1, 0xDB, 0x5E, 0x9F, 0x17, 0x85, 0x0E, 0xDC, 0x55, 0x60, 0xA5, 0x37, 0x49, 0xCF};
 uint8_t ndata_indicate_app_mipb;
+
+/*******************************************************************************
+ * Extern
+ ******************************************************************************/
 extern uint8_t ndata_indicate_event;
 
 /*******************************************************************************
@@ -82,11 +95,16 @@ void MipbTask(void)
 	if(retval != no_error)
 		return;
 	mipb.hardware_init_fn(UartBaudrate_115200);
-	mipb.delay_ms_fn(100);
 	mipb.hardware_reset_fn();
-	retval  = mipb_factory_reset(&mipb);
-	retval += mipb_enable_ndata_indicate_pin(&mipb);
-	retval += mipb_get_fw_version(&mipb);
+	nWAKE_LOW_MIPB
+	mipb.delay_ms_fn(100);
+	retval = mipb_get_fw_version(&mipb);
+	if(retval != no_error)
+	{
+		nWAKE_HIGH_MIPB
+		(void)vTaskDelay(portMAX_DELAY);
+	}
+	retval += mipb_factory_reset(&mipb);
 	retval += mipb_get_serial_no(&mipb);
 	retval += mipb_eeprom_write_network_parameters(&mipb);
 	retval += mipb_eeprom_read_network_parameters(&mipb, &mipb_stack_param);
@@ -95,6 +113,7 @@ void MipbTask(void)
 	retval += mipb_set_app_key(AppKey_mipb, &mipb);
 	retval += mipb_join(Join_mode_OTAA, &mipb);
 	retval += mipb_get_activation_status(&mipb);
+	nWAKE_HIGH_MIPB
 	if(retval != no_error)
 		return;
 	(void)xTaskCreate(MipbApp,"MipbApp",100, NULL,  MIPB_TASK_PRIOTITY, &mipb_device_task_handle);
@@ -123,7 +142,9 @@ static void MipbApp(void *pvParameters)
 			case mipb_app_check_activation:
 			{
 				/* Check if device has succesfully joined the Network */
+				nWAKE_LOW_MIPB
 				retval = mipb_get_activation_status(&mipb);
+				nWAKE_HIGH_MIPB
 				if(mipb.join_status == Joined)
 				{
 					app = mipb_app_send_message;
@@ -155,7 +176,9 @@ static void MipbApp(void *pvParameters)
 				/* OTAA join */
 				if(join_num >= MIPB_APP_MAX_JOIN_RETRY)
 					app = mipb_app_error;
+				nWAKE_LOW_MIPB
 				retval = mipb_join(Join_mode_OTAA, &mipb);
+				nWAKE_HIGH_MIPB
 				join_num++;
 				app = mipb_app_check_activation;
 				break;
@@ -164,7 +187,9 @@ static void MipbApp(void *pvParameters)
 			case mipb_app_send_message:
 			{
 				/* Send The message every xDelayTxMsg ms */
+				nWAKE_LOW_MIPB
 				retval = mipb_tx_msg_cmd(UnconfirmedDataTransmission, 1, test_msg, 4, &mipb);
+				nWAKE_HIGH_MIPB
 				ndata_indicate_app_mipb = ndata_indicate_event;
 				(void)vTaskDelay(xDelayTxMsg);
 				break;

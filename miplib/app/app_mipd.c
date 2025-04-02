@@ -30,7 +30,7 @@
 * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 * POSSIBILITY OF SUCH DAMAGE.
 *
-* @file       mip_b.c
+* @file
 * @date
 * @version
 *
@@ -50,6 +50,15 @@
  * Definitions
  ******************************************************************************/
 #define MIPD_TASK_PRIOTITY 3
+#define MIPD_SINGLE_CORE
+/* With single core Mip Series you need to drive nWAKE pin to put the module into low power consumption */
+#ifdef MIPD_SINGLE_CORE
+#define nWAKE_LOW_MIPD NWAKE_LOW
+#define nWAKE_HIGH_MIPD NWAKE_HIGH
+#else
+#define nWAKE_LOW_MIPD
+#define nWAKE_HIGH_MIPD
+#endif
 
 /*******************************************************************************
  * Prototypes
@@ -65,6 +74,10 @@ struct d_radio_phy_t mipd_radio_py;
 struct d_module_param_t mipd_config;
 TaskHandle_t mipd_device_task_handle;
 uint8_t ndata_indicate_app_mipd;
+
+/*******************************************************************************
+ * Extern
+ ******************************************************************************/
 extern uint8_t ndata_indicate_event;
 
 /*******************************************************************************
@@ -78,15 +91,21 @@ void MipdTask(void)
 	if(retval != no_error)
 		return;
 	mipd.hardware_init_fn(UartBaudrate_9600);
-	mipd.delay_ms_fn(100);
 	mipd.hardware_reset_fn();
-	retval  = mipd_enable_ndata_indicate_pin(&mipd);
-	retval += mipd_get_fw_version(&mipd);
+	nWAKE_LOW_MIPD
+	mipd.delay_ms_fn(100);
+	retval = mipd_get_fw_version(&mipd);
+	if(retval != no_error)
+	{
+		nWAKE_HIGH_MIPD
+		return;
+	}
 	retval += mipd_get_serial_no(&mipd);
 	retval += mipd_eeprom_write_module_parameters(&mipd);
 	retval += mipd_eeprom_read_module_parameters(&mipd, &mipd_config);
 	retval += mipd_eeprom_write_radio_phy_param(&mipd);
 	retval += mipd_eeprom_read_radio_phy_param(&mipd, &mipd_radio_py);
+	nWAKE_HIGH_MIPD
 	if(retval != no_error)
 		return;
 	(void)xTaskCreate(MipdApp, "MipdApp", 100, NULL, MIPD_TASK_PRIOTITY, &mipd_device_task_handle);
@@ -105,7 +124,9 @@ static void MipdApp(void *pvParameters)
 			ndata_indicate_app_mipd = ndata_indicate_event;
 		}
 		/* Trasmit a message every xDelayTxMsg ms */
+		nWAKE_HIGH_MIPD
 		(void)mipd_tx_msg_cmd(test_msg, 4, &mipd);
+		nWAKE_LOW_MIPD
 		ndata_indicate_app_mipd = ndata_indicate_event;
 		(void)vTaskDelay(xDelayTxMsg);
 	}

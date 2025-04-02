@@ -1,3 +1,41 @@
+/**
+* Copyright (c) Mipot S.p.A. All rights reserved.
+*
+* BSD-3-Clause
+*
+* Redistribution and use in source and binary forms, with or without
+* modification, are permitted provided that the following conditions are met:
+*
+* 1. Redistributions of source code must retain the above copyright
+*    notice, this list of conditions and the following disclaimer.
+*
+* 2. Redistributions in binary form must reproduce the above copyright
+*    notice, this list of conditions and the following disclaimer in the
+*    documentation and/or other materials provided with the distribution.
+*
+* 3. Neither the name of the copyright holder nor the names of its
+*    contributors may be used to endorse or promote products derived from
+*    this software without specific prior written permission.
+*
+* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+* "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+* LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+* FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+* COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+* INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+* (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+* SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+* HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+* STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
+* IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+* POSSIBILITY OF SUCH DAMAGE.
+*
+* @file
+* @date
+* @version
+*
+*/
+
 /*******************************************************************************
  * Included files
  *****************************************************************************/
@@ -39,9 +77,12 @@ uint8_t ndata_indicate_event;
 uint32_t tick_cnt;
 
 /*******************************************************************************
- * Code
+ * Extern
  ******************************************************************************/
 
+/*******************************************************************************
+ * Code
+ ******************************************************************************/
 void Mip_Hardware_Init(enum UartBaudrate_t baud)
 {
 	MIP_TIM_Init();
@@ -55,6 +96,8 @@ void Mip_Hardware_Init(enum UartBaudrate_t baud)
 		MIP_UART_Init(115200);
 	}
 }
+
+/*-----------------------------------------------------------*/
 
 static void MIP_TIM_Init(void) /* 1 mS interrupt */
 {
@@ -78,6 +121,8 @@ static void MIP_TIM_Init(void) /* 1 mS interrupt */
 #error
 #endif
 }
+
+/*-----------------------------------------------------------*/
 
 static void MIP_GPIO_Init(void)
 {
@@ -132,6 +177,8 @@ static void MIP_GPIO_Init(void)
 #endif
 }
 
+/*-----------------------------------------------------------*/
+
 static void MIP_UART_Init(uint32_t baud)
 {
 #ifdef STM32F0
@@ -153,6 +200,8 @@ static void MIP_UART_Init(uint32_t baud)
 #error
 #endif
 }
+
+/*-----------------------------------------------------------*/
 
 enum mip_error_t MipTransmitAndReceiveData(uint8_t *tx_buff, uint16_t tx_dim, uint8_t *rx_buff, uint16_t *rx_dim, uint32_t timeout_ms)
 {
@@ -258,6 +307,8 @@ enum mip_error_t MipTransmitAndReceiveData(uint8_t *tx_buff, uint16_t tx_dim, ui
 	return retval;
 }
 
+/*-----------------------------------------------------------*/
+
 enum mip_error_t MipReceiveData(uint8_t *rx_buff, uint16_t *rx_dim, uint32_t timeout_ms)
 {
 	enum mip_error_t retval = unknown_error;
@@ -331,6 +382,8 @@ enum mip_error_t MipReceiveData(uint8_t *rx_buff, uint16_t *rx_dim, uint32_t tim
 	return retval;
 }
 
+/*-----------------------------------------------------------*/
+
 __WEAK void EXTI4_15_IRQHandler(void)
 {
 #ifdef STM32F0
@@ -343,6 +396,8 @@ __WEAK void EXTI4_15_IRQHandler(void)
 #error
 #endif
 }
+
+/*-----------------------------------------------------------*/
 
 void USART2_IRQHandler(void)
 {
@@ -382,6 +437,8 @@ void USART2_IRQHandler(void)
 #endif
 }
 
+/*-----------------------------------------------------------*/
+
 __WEAK void TIM14_IRQHandler(void)
 {
 	tick_cnt++;
@@ -392,6 +449,8 @@ __WEAK void TIM14_IRQHandler(void)
 #endif
 }
 
+/*-----------------------------------------------------------*/
+
 void MipHardwareReset(void)
 {
 	HAL_GPIO_WritePin(RESET_GPIO_Port, RESET_Pin, GPIO_PIN_RESET);
@@ -399,6 +458,8 @@ void MipHardwareReset(void)
 	HAL_GPIO_WritePin(RESET_GPIO_Port, RESET_Pin, GPIO_PIN_SET);
 	Delay_ms(350);
 }
+
+/*-----------------------------------------------------------*/
 
 static void SerStartTransmit(void)
 {
@@ -409,16 +470,22 @@ static void SerStartTransmit(void)
 #endif
 }
 
+/*-----------------------------------------------------------*/
+
 uint32_t GetTick(void)
 {
 	return tick_cnt;
 }
+
+/*-----------------------------------------------------------*/
 
 void Delay_ms(uint32_t ms)
 {
 	uint32_t ticks =  GetTick();
 	while( (GetTick() - ticks) < ms);
 }
+
+/*-----------------------------------------------------------*/
 
 static ser_error_t SerCheckErrors(void)
 {

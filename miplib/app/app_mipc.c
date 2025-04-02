@@ -30,7 +30,7 @@
 * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 * POSSIBILITY OF SUCH DAMAGE.
 *
-* @file       mip_b.c
+* @file
 * @date
 * @version
 *
@@ -53,6 +53,15 @@
 #define MIPC_TASK_PRIOTITY 3
 #define MIPC_APP_SLAVE
 #define MIPC_APP_MSG_LEN 4
+#define MIPC_SINGLE_CORE
+/* With single core Mip Series you need to drive nWAKE pin to put the module into low power consumption */
+#ifdef MIPC_SINGLE_CORE
+#define nWAKE_LOW_MIPC NWAKE_LOW
+#define nWAKE_HIGH_MIPC NWAKE_HIGH
+#else
+#define nWAKE_LOW_MIPC
+#define nWAKE_HIGH_MIPC
+#endif
 
 /*******************************************************************************
  * Prototypes
@@ -68,6 +77,10 @@ static void DoSomething(void);
 struct mip_c mipc;
 TaskHandle_t mipc_device_task_handle;
 uint8_t ndata_indicate_app_mipc;
+
+/*******************************************************************************
+ * Extern
+ ******************************************************************************/
 extern uint8_t ndata_indicate_event;
 
 /*******************************************************************************
@@ -92,21 +105,27 @@ static void MipcAppMaster(void *pvParameters)
 	if(retval != no_error)
 		(void)vTaskDelay(portMAX_DELAY);
 	mipc.hardware_init_fn(UartBaudrate_115200);
-	mipc.delay_ms_fn(100);
 	mipc.hardware_reset_fn();
+	nWAKE_LOW_MIPC
+	mipc.delay_ms_fn(100);
 	retval = mipc_get_fw_version(&mipc);
 	if(retval != no_error)
+	{
+		nWAKE_HIGH_MIPC
 		(void)vTaskDelay(portMAX_DELAY);
+	}
 	/* Set device to master */
 	mipc.stack_param.device_type = master;
-	(void)mipc_factory_reset(&mipc);
-	(void)mipc_enable_ndata_indicate_pin(&mipc);
-	(void)mipc_get_serial_no(&mipc);
-	(void)mipc_eeprom_write_stack_parameters(&mipc);
-	(void)mipc_eeprom_write_radio_phy_param(&mipc);
-	(void)mipc_eeprom_write_module_parameters(&mipc);
+
+	retval += mipc_factory_reset(&mipc);
+	retval += mipc_get_serial_no(&mipc);
+
+	retval += mipc_eeprom_write_stack_parameters(&mipc);
+	retval += mipc_eeprom_write_radio_phy_param(&mipc);
+	retval += mipc_eeprom_write_module_parameters(&mipc);
 	/* Master enable pairing procedure */
-	(void)mipc_enable_pairing(&mipc);
+	retval += mipc_enable_pairing(&mipc);
+	nWAKE_HIGH_MIPC
 	ndata_indicate_app_mipc = ndata_indicate_event;
 	for(;;)
 	{
@@ -118,7 +137,9 @@ static void MipcAppMaster(void *pvParameters)
 		if(mipc.master_data.ROUTING_SIZE != 0)
 		{
 			/* MASTER SEND Message (0xFFFFFFFF = Broadcast Message) */
+			nWAKE_LOW_MIPC
 			mipc_tx_msg_cmd(UnconfirmedDataTransmission, 0xFFFFFFFF, msg, MIPC_APP_MSG_LEN, &mipc);
+			nWAKE_HIGH_MIPC
 		}
 		ndata_indicate_app_mipc = ndata_indicate_event;
 		(void)vTaskDelay(pdMS_TO_TICKS(500));
@@ -139,22 +160,28 @@ static void MipcAppSlave(void *pvParameters)
 	if(retval != no_error)
 		(void)vTaskDelay(portMAX_DELAY);
 	mipc.hardware_init_fn(UartBaudrate_115200);
-	mipc.delay_ms_fn(100);
 	mipc.hardware_reset_fn();
+	nWAKE_LOW_MIPC
+	mipc.delay_ms_fn(100);
 	retval = mipc_get_fw_version(&mipc);
 	if(retval != no_error)
+	{
+		nWAKE_HIGH_MIPC
 		(void)vTaskDelay(portMAX_DELAY);
+	}
 	/* Set device to end node */
 	mipc.stack_param.device_type = end_node;
-	(void)mipc_factory_reset(&mipc);
-	(void)mipc_enable_ndata_indicate_pin(&mipc);
-	(void)mipc_get_serial_no(&mipc);
-	(void)mipc_eeprom_write_stack_parameters(&mipc);
-	(void)mipc_eeprom_write_radio_phy_param(&mipc);
-	(void)mipc_eeprom_write_module_parameters(&mipc);
-	(void)mipc_eeprom_write_module_parameters(&mipc);
+
+	retval += mipc_factory_reset(&mipc);
+	retval += mipc_get_serial_no(&mipc);
+
+	retval += mipc_eeprom_write_stack_parameters(&mipc);
+	retval += mipc_eeprom_write_radio_phy_param(&mipc);
+	retval += mipc_eeprom_write_module_parameters(&mipc);
+	retval += mipc_eeprom_write_module_parameters(&mipc);
 	/* End node sends pairing req to master */
-	(void)mipc_pairing_req_cmd(&mipc);
+	retval += mipc_pairing_req_cmd(&mipc);
+	nWAKE_HIGH_MIPC
 	ndata_indicate_app_mipc = ndata_indicate_event;
 	for(;;)
 	{
@@ -170,7 +197,9 @@ static void MipcAppSlave(void *pvParameters)
 			case mipc_app_check_activation:
 			{
 				/* Check if the end node is alredy paired */
+				nWAKE_LOW_MIPC
 				(void)mipc_get_activation_status(&mipc);
+				nWAKE_HIGH_MIPC
 				if(mipc.end_node_data.is_paired)
 					mipc_app_enode = mipc_app_receive_message;
 				else
@@ -189,7 +218,9 @@ static void MipcAppSlave(void *pvParameters)
 				else
 				{
 					/* Perform a pairing request to the master */
+					nWAKE_LOW_MIPC
 					(void)mipc_pairing_req_cmd(&mipc);
+					nWAKE_HIGH_MIPC
 					enode_pairing_req++;
 					mipc_app_enode = mipc_app_check_activation;
 				}

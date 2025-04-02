@@ -30,7 +30,7 @@
 * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 * POSSIBILITY OF SUCH DAMAGE.
 *
-* @file       mip_b.c
+* @file
 * @date
 * @version
 *
@@ -50,6 +50,15 @@
  * Definitions
  ******************************************************************************/
 #define MIPA_TASK_PRIOTITY 3
+#define MIPA_SINGLE_CORE
+/* With single core Mip Series you need to drive nWAKE pin to put the module into low power consumption */
+#ifdef MIPA_SINGLE_CORE
+#define nWAKE_LOW_MIPA NWAKE_LOW
+#define nWAKE_HIGH_MIPA NWAKE_HIGH
+#else
+#define nWAKE_LOW_MIPA
+#define nWAKE_HIGH_MIPA
+#endif
 
 /*******************************************************************************
  * Prototypes
@@ -67,8 +76,12 @@ struct a_module_param_t mipa_config;
 struct a_medium_access_param_t mipa_medium_access_param;
 TaskHandle_t mipa_device_task_handle;
 uint8_t ndata_indicate_app_mipa;
-extern uint8_t ndata_indicate_event;
 
+/*******************************************************************************
+ * Extern
+ ******************************************************************************/
+ extern uint8_t ndata_indicate_event;
+ 
 /*******************************************************************************
  * Code
  ******************************************************************************/
@@ -88,26 +101,27 @@ static void MipaAppStationaryReceiver(void *pvParameters)
 	(void)MipaInit(&mipa);
 	retval = mipa_null_ptr_check(&mipa);
 	if(retval != no_error)
+	{
 		(void)vTaskDelay(portMAX_DELAY);
-
+	}
 	mipa.hardware_init_fn(UartBaudrate_115200);
-	mipa.delay_ms_fn(100);
 	mipa.hardware_reset_fn();
-
-	retval  = mipa_enable_ndata_indicate_pin(&mipa);
-	retval += mipa_get_fw_version(&mipa);
+	nWAKE_LOW_MIPA
+	mipa.delay_ms_fn(100);
+	retval = mipa_get_fw_version(&mipa);
+	if(retval != no_error)
+	{
+		nWAKE_HIGH_MIPA
+		(void)vTaskDelay(portMAX_DELAY);
+	}
 	retval += mipa_get_serial_no(&mipa);
-
 	retval += mipa_eeprom_write_module_parameters(&mipa);
 	retval += mipa_eeprom_read_module_parameters(&mipa, &mipa_config);
-
 	retval += mipa_eeprom_write_radio_phy_param(&mipa);
 	retval += mipa_eeprom_read_radio_phy_param(&mipa, &mipa_radio_py);
-
 	retval += mipa_eeprom_write_wmbus_medium_access_parameters(&mipa);
 	retval += mipa_eeprom_read_wmbus_medium_access_parameters(&mipa, &mipa_medium_access_param);
-	if(retval != no_error)
-		(void)vTaskDelay(portMAX_DELAY);
+	nWAKE_HIGH_MIPA
 	ndata_indicate_app_mipa = ndata_indicate_event;
 	for(;;)
 	{
@@ -130,22 +144,24 @@ static void MipaAppTransmitterDevice(void *pvParameters)
 	(void)MipaInit(&mipa);
 	retval = mipa_null_ptr_check(&mipa);
 	if(retval != no_error)
+	{
 		(void)vTaskDelay(portMAX_DELAY);
-
+	}
 	mipa.hardware_init_fn(UartBaudrate_115200);
-	mipa.delay_ms_fn(100);
 	mipa.hardware_reset_fn();
-
-	retval  = mipa_enable_ndata_indicate_pin(&mipa);
-	retval += mipa_get_fw_version(&mipa);
+	nWAKE_LOW_MIPA
+	mipa.delay_ms_fn(100);
+	retval = mipa_get_fw_version(&mipa);
+	if(retval != no_error)
+	{
+		nWAKE_HIGH_MIPA
+		(void)vTaskDelay(portMAX_DELAY);
+	}
 	retval += mipa_get_serial_no(&mipa);
-
 	retval += mipa_eeprom_write_module_parameters(&mipa);
 	retval += mipa_eeprom_read_module_parameters(&mipa, &mipa_config);
-
 	retval += mipa_eeprom_write_radio_phy_param(&mipa);
 	retval += mipa_eeprom_read_radio_phy_param(&mipa, &mipa_radio_py);
-
 	retval += mipa_eeprom_write_wmbus_medium_access_parameters(&mipa);
 	retval += mipa_eeprom_read_wmbus_medium_access_parameters(&mipa, &mipa_medium_access_param);
 	if(retval != no_error)
@@ -153,7 +169,9 @@ static void MipaAppTransmitterDevice(void *pvParameters)
 	for(;;)
 	{
 		/* Trasmit a message every xDelayTxMsg ms */
+		nWAKE_LOW_MIPA
 		(void)mipa_tx_msg_cmd(test_msg, 10, &mipa);
+		nWAKE_HIGH_MIPA
 		(void)vTaskDelay(xDelayTxMsg);
 	}
 	(void)vTaskDelete(NULL);

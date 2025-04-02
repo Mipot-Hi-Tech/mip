@@ -1,2 +1,6 @@
 /inkscape
 desktop.ini
+*.bak
+*.py
+*.log
+.vscode/
