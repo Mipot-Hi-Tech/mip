@@ -122,8 +122,8 @@ enum mip_error_t mipc_factory_reset(const struct mip_c *const dev)
 	mipc_tx_buff[1] = MIP_FACTORY_RESET_CMD;
 	mipc_tx_buff[2] = 0x00;
 	mipc_tx_buff[3] = mip_generate_checksum(mipc_tx_buff, 3);
-	retval = dev->send_and_receive_fn(mipc_tx_buff, 4, mipc_rx_buff, &rx_msg_len, 200);
-	dev->delay_ms_fn(MIP_DELAY_FACTORY_RESET);
+	retval = dev->send_and_receive_fn(mipc_tx_buff, 4, mipc_rx_buff, &rx_msg_len, MIP_DELAY_FACTORY_RESET);
+	dev->delay_ms_fn(MIPC_DELAY_MSG);
 	return retval;
 }
 

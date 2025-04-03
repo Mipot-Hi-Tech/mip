@@ -59,8 +59,8 @@
 #define RESET_GPIO_Port          GPIOB
 #define NWAKE_Pin                GPIO_PIN_11
 #define NWAKE_GPIO_Port          GPIOB
-#define NWAKE_HIGH HAL_GPIO_WritePin(NWAKE_GPIO_Port, NWAKE_Pin, GPIO_PIN_SET)
-#define NWAKE_LOW HAL_GPIO_WritePin(NWAKE_GPIO_Port, NWAKE_Pin, GPIO_PIN_RESET)
+#define NWAKE_HIGH HAL_GPIO_WritePin(NWAKE_GPIO_Port, NWAKE_Pin, GPIO_PIN_SET);
+#define NWAKE_LOW HAL_GPIO_WritePin(NWAKE_GPIO_Port, NWAKE_Pin, GPIO_PIN_RESET);
 
 typedef enum{
        SER_NO_ERROR      = 0x00U,

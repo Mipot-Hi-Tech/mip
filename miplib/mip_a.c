@@ -123,9 +123,8 @@ enum mip_error_t mipa_factory_reset(const struct mip_a *const dev)
 	mipa_tx_buff[1] = MIP_FACTORY_RESET_CMD;
 	mipa_tx_buff[2] = 0x00;
 	mipa_tx_buff[3] = mip_generate_checksum(mipa_tx_buff, 3);
-	/* After a factory reset cmd response from mipa is coming after 140 ms */
-	retval = dev->send_and_receive_fn(mipa_tx_buff, 4, mipa_rx_buff, &rx_msg_len, 200);
-	dev->delay_ms_fn(MIP_DELAY_FACTORY_RESET);
+	retval = dev->send_and_receive_fn(mipa_tx_buff, 4, mipa_rx_buff, &rx_msg_len, MIP_DELAY_FACTORY_RESET);
+	dev->delay_ms_fn(MIPA_DELAY_MSG);
 	return retval;
 }
 

@@ -45,9 +45,6 @@
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
-#define MIP_IPCC_TX_TIMEOUT 100
-#define MIP_IPCC_RX_TIMEOUT 100
-
 typedef enum{
 	IPCC_TXRX_HANDLER_IDLE                  = 0x00U,
 	IPCC_TXRX_HANDLER_TX_DATA_TRANSMISSION  = 0x01U,
